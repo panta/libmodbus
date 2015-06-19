@@ -165,6 +165,55 @@ typedef struct {
     uint16_t *tab_registers;
 } modbus_mapping_t;
 
+typedef struct _modbus_mapping_dynamic_struct modbus_mapping_dynamic_t;
+
+typedef int (*modbus_dynamic_response_check_address_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address, int nb);
+
+typedef int (*modbus_dynamic_response_read_bits_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    int nb,
+                    uint8_t *rsp, int offset);
+typedef int (*modbus_dynamic_response_read_words_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    int nb,
+                    uint8_t *rsp, int offset);
+typedef int (*modbus_dynamic_response_write_bit_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    int data);
+typedef int (*modbus_dynamic_response_write_word_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    uint16_t data);
+typedef int (*modbus_dynamic_response_write_bits_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    const uint8_t *data, unsigned int nb_bits);
+typedef int (*modbus_dynamic_response_write_words_cb)(modbus_t *ctx,
+                    modbus_mapping_dynamic_t *mb_mapping,
+                    int slave, int function, int address,
+                    const uint16_t *data, unsigned int nb_words);
+
+struct _modbus_mapping_dynamic_struct {
+    modbus_dynamic_response_check_address_cb check_address;
+
+    modbus_dynamic_response_read_bits_cb     read_coils;
+    modbus_dynamic_response_read_bits_cb     read_discrete_inputs;
+
+    modbus_dynamic_response_read_words_cb    read_holding_registers;
+    modbus_dynamic_response_read_words_cb    read_input_registers;
+
+    modbus_dynamic_response_write_bit_cb     write_single_coil;
+    modbus_dynamic_response_write_word_cb    write_single_register;
+
+    modbus_dynamic_response_write_bits_cb    write_multiple_coils;
+    modbus_dynamic_response_write_words_cb   write_multiple_registers;
+};
+
 typedef enum
 {
     MODBUS_ERROR_RECOVERY_NONE          = 0,
@@ -213,6 +262,9 @@ MODBUS_API modbus_mapping_t* modbus_mapping_new(int nb_bits, int nb_input_bits,
                                             int nb_registers, int nb_input_registers);
 MODBUS_API void modbus_mapping_free(modbus_mapping_t *mb_mapping);
 
+MODBUS_API modbus_mapping_dynamic_t* modbus_mapping_dynamic_new(void);
+MODBUS_API void modbus_mapping_dynamic_free(modbus_mapping_dynamic_t *mb_mapping);
+
 MODBUS_API int modbus_send_raw_request(modbus_t *ctx, uint8_t *raw_req, int raw_req_length);
 
 MODBUS_API int modbus_receive(modbus_t *ctx, uint8_t *req);
@@ -223,6 +275,9 @@ MODBUS_API int modbus_reply(modbus_t *ctx, const uint8_t *req,
                             int req_length, modbus_mapping_t *mb_mapping);
 MODBUS_API int modbus_reply_exception(modbus_t *ctx, const uint8_t *req,
                                       unsigned int exception_code);
+
+MODBUS_API int modbus_reply_dynamic(modbus_t *ctx, const uint8_t *req,
+                                    int req_length, modbus_mapping_dynamic_t *mb_mapping);
 
 /**
  * UTILS FUNCTIONS
