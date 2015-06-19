@@ -212,6 +212,9 @@ struct _modbus_mapping_dynamic_struct {
 
     modbus_dynamic_response_write_bits_cb    write_multiple_coils;
     modbus_dynamic_response_write_words_cb   write_multiple_registers;
+
+    void *userdata;
+    void *userdata2;
 };
 
 typedef enum
